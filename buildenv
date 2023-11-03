@@ -2,8 +2,10 @@ export ZOPEN_STABLE_URL="https://github.com/stigtsp/moreutils.git"
 export ZOPEN_STABLE_DEPS="zoslib make coreutils getopt"
 export ZOPEN_CONFIGURE="skip"
 export ZOPEN_BUILD_LINE="STABLE"
-export ZOPEN_MAKE_OPTS="sponge parallel errno pee mispipe"
-export ZOPEN_INSTALL_OPTS="PREFIX=\$ZOPEN_INSTALL_DIR install"
+BINS="sponge parallel errno pee mispipe"
+export ZOPEN_MAKE_OPTS="$BINS"
+export ZOPEN_CHECK="skip" # Requires some fixes to getopt first
+export ZOPEN_INSTALL_OPTS="PREFIX=\$ZOPEN_INSTALL_DIR install BINS=\"$BINS\""
 
 zopen_check_results()
 {
@@ -20,7 +22,6 @@ zopen_check_results()
 
 zopen_get_version()
 {
-  # Modify to echo the version of your tool/library
-  # Rather than hardcoding the version, obtain the version by running the tool/library
+  # There doesn't seem to be a version, so use 1.0.0
   echo "1.0.0"
 }

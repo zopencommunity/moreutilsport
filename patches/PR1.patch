@@ -1,0 +1,138 @@
+diff --git a/is_utf8/Makefile b/is_utf8/Makefile
+index 4ebf8be..bcb297d 100644
+--- a/is_utf8/Makefile
++++ b/is_utf8/Makefile
+@@ -41,7 +41,7 @@ CC = gcc
+ CFLAGS = -O3 -Wextra -Wall -ansi -Wstrict-prototypes
+ 
+ $(NAME): $(OBJ)
+-	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
++	$(CC) $(CFLAGS) -o $(NAME) $(OBJ) $(LIBS)
+ 
+ IS_UTF8_LIB:
+ 	$(CC) --shared -fPIC $(CFLAGS) $(LIB_SRC) -o $(LINKERNAME)
+diff --git a/is_utf8/main.c b/is_utf8/main.c
+index e0730cd..e8bb330 100644
+--- a/is_utf8/main.c
++++ b/is_utf8/main.c
+@@ -23,7 +23,9 @@
+  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
++#ifndef __MVS__
+ #define _POSIX_C_SOURCE 200809L
++#endif
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ #include <fcntl.h>
+@@ -113,6 +115,57 @@ static void print_utf8_error(
+ #define handle_error(msg, target)                                   \
+     do {retval = EXIT_FAILURE; perror(msg); goto target;} while (0)
+ 
++ssize_t getline(char **line, size_t *len, FILE *stream) {
++    if (line == NULL || len == NULL) {
++        return -1;
++    }
++
++    char *buffer = NULL;
++    size_t bufsize = 0;
++    ssize_t bytesRead = 0;
++    int c;
++
++    if (*line == NULL) {
++        bufsize = 128;  // Initial buffer size
++        buffer = (char *)malloc(bufsize);
++        if (buffer == NULL) {
++            return -1;  // Memory allocation failed
++        }
++    } else {
++        buffer = *line;
++        bufsize = *len;
++    }
++
++    while ((c = fgetc(stream)) != EOF && c != '\n') {
++        if (bytesRead + 1 >= bufsize) {
++            // Resize the buffer when needed
++            bufsize *= 2;
++            char *new_buffer = (char *)realloc(buffer, bufsize);
++            if (new_buffer == NULL) {
++                free(buffer);
++                return -1;  // Memory allocation failed
++            }
++            buffer = new_buffer;
++        }
++
++        buffer[bytesRead++] = c;
++    }
++
++    if (bytesRead == 0 && c == EOF) {
++        free(buffer);
++        return -1;  // No data read
++    }
++
++    buffer[bytesRead] = '\0';  // Null-terminate the string
++
++    if (*line == NULL) {
++        *line = buffer;
++    }
++
++    *len = bufsize;
++    return bytesRead;
++}
++
+ static int is_utf8_readline(FILE *stream, const char *file_path,
+                             int quiet, int verbose, int list_only, int invert)
+ {
+diff --git a/parallel.c b/parallel.c
+index 8a37998..4d8f979 100644
+--- a/parallel.c
++++ b/parallel.c
+@@ -333,7 +333,9 @@ int main(int argc, char **argv) {
+ 	}
+ 
+ 	if (maxjobs < 0) {
+-#ifdef _SC_NPROCESSORS_ONLN
++#ifdef __MVS__
++		maxjobs = __get_num_online_cpus();
++#elif _SC_NPROCESSORS_ONLN
+ 		maxjobs = sysconf(_SC_NPROCESSORS_ONLN);
+ #else
+ #warning Cannot autodetect number of CPUS on this system: _SC_NPROCESSORS_ONLN not defined.
+@@ -378,7 +380,8 @@ int main(int argc, char **argv) {
+ 	while (argidx < arglen) {
+ 		double load;
+ 
+-		getloadavg(&load, 1);
++		//getloadavg(&load, 1);
++    load = 0;
+ 
+ 		if ((maxjobs == 0 || curjobs < maxjobs) &&
+ 		    (maxload < 0 || load < maxload)) {
+diff --git a/pee.c b/pee.c
+index 92df61c..2e306e9 100644
+--- a/pee.c
++++ b/pee.c
+@@ -5,6 +5,7 @@
+ #include <sys/types.h>
+ #include <sys/wait.h>
+ #include <errno.h>
++#include <signal.h>
+ 
+ /* Licensed under the GPL
+  * Copyright (c) Miek Gieben, 2006
+diff --git a/sponge.c b/sponge.c
+index 09d3971..8613acb 100644
+--- a/sponge.c
++++ b/sponge.c
+@@ -26,6 +26,10 @@
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ /* MAX() */
++#ifdef __MVS__
++#define MAX(a, b) ((a > b) ? a : b)
++#endif
++
+ #include <sys/param.h>
+ #include <fcntl.h>
+ #include <errno.h>
+

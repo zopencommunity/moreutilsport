@@ -1,0 +1,42 @@
+diff --git a/errno.c b/errno.c
+index d2f68a1..6c85924 100644
+--- a/errno.c
++++ b/errno.c
+@@ -26,9 +26,37 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <strings.h>
+ #include <unistd.h>
+ #include <getopt.h>
+ 
++#ifdef __MVS__
++char *strcasestr(const char *haystack, const char *needle) {
++    if (!*needle) {
++        return (char *)haystack;  // Empty needle is always found at the beginning.
++    }
++
++    while (*haystack) {
++        // Use a temporary variable to iterate through the haystack in a case-insensitive manner.
++        const char *h = haystack;
++        const char *n = needle;
++
++        while (*h && *n && tolower((unsigned char)*h) == tolower((unsigned char)*n)) {
++            h++;
++            n++;
++        }
++
++        // If we reached the end of the needle, we found a match.
++        if (!*n) {
++            return (char *)haystack;
++        }
++
++        haystack++;  // Move to the next character in the haystack.
++    }
++
++    return NULL;  // Needle not found in haystack.
++}
++#endif
+ 
+ static struct {
+     const char *name;

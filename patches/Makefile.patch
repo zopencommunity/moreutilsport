@@ -1,0 +1,22 @@
+diff --git a/Makefile b/Makefile
+index 1e92f61..07f29e0 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,4 +1,4 @@
+-BINS=isutf8 ifdata ifne pee sponge mispipe lckdo parallel errno
++BINS?=isutf8 ifdata ifne pee sponge mispipe lckdo parallel errno
+ PERLSCRIPTS=vidir vipe ts combine zrun chronic
+ MANS=sponge.1 vidir.1 vipe.1 isutf8.1 ts.1 combine.1 ifdata.1 ifne.1 pee.1 zrun.1 chronic.1 mispipe.1 lckdo.1 parallel.1 errno.1
+ CFLAGS?=-O2 -g -Wall
+@@ -28,8 +28,9 @@ install:
+ 	$(INSTALL_BIN) $(BINS) $(DESTDIR)$(PREFIX)/bin
+ 	install $(PERLSCRIPTS) $(DESTDIR)$(PREFIX)/bin
+ 
+-	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
+-	install $(MANS) $(DESTDIR)$(PREFIX)/share/man/man1
++	#TODO: fix on z/OS
++	#mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
++	#install $(MANS) $(DESTDIR)$(PREFIX)/share/man/man1
+ 
+ check: isutf8
+ 	./is_utf8/test.sh
