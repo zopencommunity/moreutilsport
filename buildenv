@@ -1,5 +1,9 @@
+# bump: moreutils-version /MOREUTILS_VERSION="(.*)"/ https://ftp.debian.org/debian/pool/main/m/moreutils/|re:/moreutils_([\d.]+).orig.tar.gz/$1/|semver:*
+MOREUTILS_VERSION="0.67"
+
 export ZOPEN_STABLE_URL="https://github.com/stigtsp/moreutils.git"
-export ZOPEN_STABLE_DEPS="zoslib make coreutils getopt"
+export ZOPEN_STABLE_URL="https://ftp.debian.org/debian/pool/main/m/moreutils/moreutils_${MOREUTILS_VERSION}.orig.tar.gz"
+export ZOPEN_STABLE_DEPS="zoslib make coreutils getopt curl gzip"
 export ZOPEN_CONFIGURE="skip"
 export ZOPEN_BUILD_LINE="STABLE"
 BINS="sponge parallel errno pee mispipe"
@@ -22,6 +26,5 @@ zopen_check_results()
 
 zopen_get_version()
 {
-  # There doesn't seem to be a version, so use 1.0.0
-  echo "1.0.0"
+  echo "$MOREUTILS_VERSION"
 }
