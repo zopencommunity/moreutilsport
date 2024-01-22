@@ -11,6 +11,9 @@ export ZOPEN_MAKE_OPTS="$BINS"
 export ZOPEN_CHECK="skip" # Requires some fixes to getopt first
 export ZOPEN_INSTALL_OPTS="PREFIX=\$ZOPEN_INSTALL_DIR install BINS=\"$BINS\""
 
+ln -sf "moreutils-${MOREUTILS_VERSION}" "moreutils_${MOREUTILS_VERSION}.orig"
+export ZOPEN_NAME="moreutils-${MOREUTILS_VERSION}"
+
 zopen_check_results()
 {
   dir="$1"

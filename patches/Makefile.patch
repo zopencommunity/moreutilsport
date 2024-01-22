@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 1e92f61..07f29e0 100644
+index cb9c10b..68c5379 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1,4 +1,4 @@
@@ -13,10 +13,10 @@ index 1e92f61..07f29e0 100644
  	install $(PERLSCRIPTS) $(DESTDIR)$(PREFIX)/bin
  
 -	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
--	install $(MANS) $(DESTDIR)$(PREFIX)/share/man/man1
+-	install -m 644 $(MANS) $(DESTDIR)$(PREFIX)/share/man/man1
 +	#TODO: fix on z/OS
-+	#mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
++  # mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
 +	#install $(MANS) $(DESTDIR)$(PREFIX)/share/man/man1
  
- check: isutf8
- 	./is_utf8/test.sh
+ uninstall:
+ 	for i in $(BINS) $(PERLSCRIPTS); do rm -f $(DESTDIR)$(PREFIX)/bin/$$i; done

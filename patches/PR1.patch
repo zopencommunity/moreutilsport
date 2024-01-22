@@ -1,16 +1,3 @@
-diff --git a/is_utf8/Makefile b/is_utf8/Makefile
-index 4ebf8be..bcb297d 100644
---- a/is_utf8/Makefile
-+++ b/is_utf8/Makefile
-@@ -41,7 +41,7 @@ CC = gcc
- CFLAGS = -O3 -Wextra -Wall -ansi -Wstrict-prototypes
- 
- $(NAME): $(OBJ)
--	$(CC) $(CFLAGS) -o $(NAME) $(OBJ)
-+	$(CC) $(CFLAGS) -o $(NAME) $(OBJ) $(LIBS)
- 
- IS_UTF8_LIB:
- 	$(CC) --shared -fPIC $(CFLAGS) $(LIB_SRC) -o $(LINKERNAME)
 diff --git a/is_utf8/main.c b/is_utf8/main.c
 index e0730cd..e8bb330 100644
 --- a/is_utf8/main.c
