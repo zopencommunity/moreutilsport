@@ -1,14 +1,15 @@
-# bump: moreutils-version /MOREUTILS_VERSION="(.*)"/ https://ftp.debian.org/debian/pool/main/m/moreutils/|re:/moreutils_([\d.]+).orig.tar.gz/$1/|semver:*
-MOREUTILS_VERSION="0.67"
+# bump: moreutils-version /MOREUTILS_VERSION="(.*)"/ https://ftp.debian.org/debian/pool/main/m/moreutils/|re:/href="moreutils_([\d.]+).orig.tar.xz"/$1/|semver:*
+MOREUTILS_VERSION="0.69"
 
-export ZOPEN_STABLE_URL="https://github.com/stigtsp/moreutils.git"
-export ZOPEN_STABLE_URL="https://ftp.debian.org/debian/pool/main/m/moreutils/moreutils_${MOREUTILS_VERSION}.orig.tar.gz"
-export ZOPEN_STABLE_DEPS="zoslib make coreutils getopt curl gzip"
+#export ZOPEN_STABLE_URL="https://github.com/stigtsp/moreutils.git"
+export ZOPEN_STABLE_URL="https://ftp.debian.org/debian/pool/main/m/moreutils/moreutils_${MOREUTILS_VERSION}.orig.tar.xz"
+export ZOPEN_STABLE_DEPS="zoslib make coreutils getopt curl gzip libxslt"
 export ZOPEN_CONFIGURE="skip"
 export ZOPEN_BUILD_LINE="STABLE"
-BINS="sponge parallel errno pee mispipe"
+BINS="isutf8 ifne sponge parallel errno pee mispipe"
 export ZOPEN_MAKE_OPTS="$BINS"
 export ZOPEN_CHECK="skip" # Requires some fixes to getopt first
+export ZOPEN_EXTRA_CPPFLAGS="-D_OPEN_SYS_SOCK_IPV6=1"
 export ZOPEN_INSTALL_OPTS="PREFIX=\$ZOPEN_INSTALL_DIR install BINS=\"$BINS\""
 
 ln -sf "moreutils-${MOREUTILS_VERSION}" "moreutils_${MOREUTILS_VERSION}.orig"

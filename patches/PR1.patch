@@ -1,7 +1,77 @@
-diff --git a/is_utf8/main.c b/is_utf8/main.c
-index e0730cd..e8bb330 100644
---- a/is_utf8/main.c
-+++ b/is_utf8/main.c
+diff --git i/Makefile w/Makefile
+index 35c33b9..b91c978 100644
+--- i/Makefile
++++ w/Makefile
+@@ -1,4 +1,4 @@
+-BINS=isutf8 ifdata ifne pee sponge mispipe lckdo parallel errno
++BINS?=isutf8 ifdata ifne pee sponge mispipe lckdo parallel errno
+ PERLSCRIPTS=vidir vipe ts combine zrun chronic
+ MANS=sponge.1 vidir.1 vipe.1 isutf8.1 ts.1 combine.1 ifdata.1 ifne.1 pee.1 zrun.1 chronic.1 mispipe.1 lckdo.1 parallel.1 errno.1
+ CFLAGS?=-O2 -g -Wall
+@@ -33,8 +33,8 @@ install:
+ 	$(INSTALL_BIN) $(BINS) $(DESTDIR)$(PREFIX)/bin
+ 	install $(PERLSCRIPTS) $(DESTDIR)$(PREFIX)/bin
+ 
+-	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
+-	install -m 644 $(MANS) $(DESTDIR)$(PREFIX)/share/man/man1
++	#mkdir -p $(DESTDIR)$(PREFIX)/share/man/man1
++	#install -m 644 $(MANS) $(DESTDIR)$(PREFIX)/share/man/man1
+ 
+ uninstall:
+ 	for i in $(BINS) $(PERLSCRIPTS); do rm -f $(DESTDIR)$(PREFIX)/bin/$$i; done
+diff --git i/chronic w/chronic
+index 43e8693..4659eed 100755
+--- i/chronic
++++ w/chronic
+@@ -1,4 +1,4 @@
+-#!/usr/bin/perl
++#!/usr/bin/env perl
+ 
+ =head1 NAME
+ 
+diff --git i/combine w/combine
+index 7f311d7..08359dd 100755
+--- i/combine
++++ w/combine
+@@ -1,4 +1,4 @@
+-#!/usr/bin/perl
++#!/usr/bin/env perl
+ 
+ =head1 NAME
+ 
+diff --git i/errno.c w/errno.c
+index fcf3dee..4d5b265 100644
+--- i/errno.c
++++ w/errno.c
+@@ -26,10 +26,10 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <strings.h>
+ #include <unistd.h>
+ #include <getopt.h>
+ 
+-
+ static struct {
+     const char *name;
+     int code;
+diff --git i/is_utf8/Makefile w/is_utf8/Makefile
+index 13b1021..78e6e87 100644
+--- i/is_utf8/Makefile
++++ w/is_utf8/Makefile
+@@ -41,7 +41,7 @@ CC = gcc
+ CFLAGS ?= -O3 -Wextra -Wall -ansi -Wstrict-prototypes
+ 
+ $(NAME): $(OBJ)
+-	$(CC) $(CFLAGS) -o $(NAME) $(OBJ) $(LDFLAGS)
++	$(CC) $(CFLAGS) -o $(NAME) $(OBJ) $(LDFLAGS) $(LIBS)
+ 
+ IS_UTF8_LIB:
+ 	$(CC) --shared -fPIC $(CFLAGS) $(LDFLAGS) $(LIB_SRC) -o $(LINKERNAME)
+diff --git i/is_utf8/main.c w/is_utf8/main.c
+index e0730cd..1ab73d3 100644
+--- i/is_utf8/main.c
++++ w/is_utf8/main.c
 @@ -23,7 +23,9 @@
   * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   */
@@ -12,93 +82,10 @@ index e0730cd..e8bb330 100644
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <fcntl.h>
-@@ -113,6 +115,57 @@ static void print_utf8_error(
- #define handle_error(msg, target)                                   \
-     do {retval = EXIT_FAILURE; perror(msg); goto target;} while (0)
- 
-+ssize_t getline(char **line, size_t *len, FILE *stream) {
-+    if (line == NULL || len == NULL) {
-+        return -1;
-+    }
-+
-+    char *buffer = NULL;
-+    size_t bufsize = 0;
-+    ssize_t bytesRead = 0;
-+    int c;
-+
-+    if (*line == NULL) {
-+        bufsize = 128;  // Initial buffer size
-+        buffer = (char *)malloc(bufsize);
-+        if (buffer == NULL) {
-+            return -1;  // Memory allocation failed
-+        }
-+    } else {
-+        buffer = *line;
-+        bufsize = *len;
-+    }
-+
-+    while ((c = fgetc(stream)) != EOF && c != '\n') {
-+        if (bytesRead + 1 >= bufsize) {
-+            // Resize the buffer when needed
-+            bufsize *= 2;
-+            char *new_buffer = (char *)realloc(buffer, bufsize);
-+            if (new_buffer == NULL) {
-+                free(buffer);
-+                return -1;  // Memory allocation failed
-+            }
-+            buffer = new_buffer;
-+        }
-+
-+        buffer[bytesRead++] = c;
-+    }
-+
-+    if (bytesRead == 0 && c == EOF) {
-+        free(buffer);
-+        return -1;  // No data read
-+    }
-+
-+    buffer[bytesRead] = '\0';  // Null-terminate the string
-+
-+    if (*line == NULL) {
-+        *line = buffer;
-+    }
-+
-+    *len = bufsize;
-+    return bytesRead;
-+}
-+
- static int is_utf8_readline(FILE *stream, const char *file_path,
-                             int quiet, int verbose, int list_only, int invert)
- {
-diff --git a/parallel.c b/parallel.c
-index 8a37998..4d8f979 100644
---- a/parallel.c
-+++ b/parallel.c
-@@ -333,7 +333,9 @@ int main(int argc, char **argv) {
- 	}
- 
- 	if (maxjobs < 0) {
--#ifdef _SC_NPROCESSORS_ONLN
-+#ifdef __MVS__
-+		maxjobs = __get_num_online_cpus();
-+#elif _SC_NPROCESSORS_ONLN
- 		maxjobs = sysconf(_SC_NPROCESSORS_ONLN);
- #else
- #warning Cannot autodetect number of CPUS on this system: _SC_NPROCESSORS_ONLN not defined.
-@@ -378,7 +380,8 @@ int main(int argc, char **argv) {
- 	while (argidx < arglen) {
- 		double load;
- 
--		getloadavg(&load, 1);
-+		//getloadavg(&load, 1);
-+    load = 0;
- 
- 		if ((maxjobs == 0 || curjobs < maxjobs) &&
- 		    (maxload < 0 || load < maxload)) {
-diff --git a/pee.c b/pee.c
+diff --git i/pee.c w/pee.c
 index 92df61c..2e306e9 100644
---- a/pee.c
-+++ b/pee.c
+--- i/pee.c
++++ w/pee.c
 @@ -5,6 +5,7 @@
  #include <sys/types.h>
  #include <sys/wait.h>
@@ -107,10 +94,10 @@ index 92df61c..2e306e9 100644
  
  /* Licensed under the GPL
   * Copyright (c) Miek Gieben, 2006
-diff --git a/sponge.c b/sponge.c
-index 09d3971..8613acb 100644
---- a/sponge.c
-+++ b/sponge.c
+diff --git i/sponge.c w/sponge.c
+index f852ad5..376ad06 100644
+--- i/sponge.c
++++ w/sponge.c
 @@ -26,6 +26,10 @@
  #include <sys/types.h>
  #include <sys/stat.h>
@@ -122,4 +109,43 @@ index 09d3971..8613acb 100644
  #include <sys/param.h>
  #include <fcntl.h>
  #include <errno.h>
-
+diff --git i/ts w/ts
+index af23cf7..91a3e24 100755
+--- i/ts
++++ w/ts
+@@ -1,4 +1,4 @@
+-#!/usr/bin/perl
++#!/usr/bin/env perl
+ 
+ =head1 NAME
+ 
+diff --git i/vidir w/vidir
+index 4a1f5f2..6147541 100755
+--- i/vidir
++++ w/vidir
+@@ -1,4 +1,4 @@
+-#!/usr/bin/perl
++#!/usr/bin/env perl
+ 
+ =head1 NAME
+ 
+diff --git i/vipe w/vipe
+index 9daaec5..3de8f36 100755
+--- i/vipe
++++ w/vipe
+@@ -1,4 +1,4 @@
+-#!/usr/bin/perl
++#!/usr/bin/env perl
+ 
+ =head1 NAME
+ 
+diff --git i/zrun w/zrun
+index 98d1445..8589557 100755
+--- i/zrun
++++ w/zrun
+@@ -1,4 +1,4 @@
+-#!/usr/bin/perl
++#!/usr/bin/env perl
+ 
+ =head1 NAME
+ 
