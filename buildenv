@@ -2,6 +2,7 @@
 MOREUTILS_VERSION="0.69"
 
 #export ZOPEN_STABLE_URL="https://github.com/stigtsp/moreutils.git"
+export ZOPEN_CATEGORIES="utilities"
 export ZOPEN_STABLE_URL="https://ftp.debian.org/debian/pool/main/m/moreutils/moreutils_${MOREUTILS_VERSION}.orig.tar.xz"
 export ZOPEN_STABLE_DEPS="zoslib make coreutils getopt curl gzip libxslt"
 export ZOPEN_CONFIGURE="skip"
