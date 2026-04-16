@@ -1,5 +1,5 @@
 # bump: moreutils-version /MOREUTILS_VERSION="(.*)"/ https://ftp.debian.org/debian/pool/main/m/moreutils/|re:/href="moreutils_([\d.]+).orig.tar.xz"/$1/|semver:*
-MOREUTILS_VERSION="0.69"
+MOREUTILS_VERSION="0.70"
 
 #export ZOPEN_STABLE_URL="https://github.com/stigtsp/moreutils.git"
 export ZOPEN_CATEGORIES="utilities"
